@@ -8,14 +8,14 @@ namespace ITI.NetMorseCode
 {
     public class MorsePlayer
     {
-        MorseProcessor _translator;
+        MorseProcessor _processor;
         string Morse { get; set; }
 
         public string Text { get; set; }
 
-        public MorsePlayer(MorseProcessor translator)
+        public MorsePlayer(MorseProcessor processor)
         {
-            _translator = translator;
+            _processor = processor;
             Text = "sos";
         }
 
@@ -24,7 +24,7 @@ namespace ITI.NetMorseCode
             Morse = MorseProcessor.ConvertToMorseCode(Text);
             int idx = 0;
 
-            foreach (MorsePulsation pulse in _translator.GetPulseFromMorse(Morse))
+            foreach (MorsePulsation pulse in _processor.GetPulseFromMorse(Morse))
             {
                 if (PulsationType.PAUSE == pulse.Type)
                 {
@@ -41,7 +41,6 @@ namespace ITI.NetMorseCode
                     Console.Beep(700, pulse.DurationInMSeconds);
                     ++idx;
                 }
-               
             }
         }
     }

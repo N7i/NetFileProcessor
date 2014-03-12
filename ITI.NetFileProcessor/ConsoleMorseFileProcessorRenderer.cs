@@ -14,7 +14,7 @@ namespace ITI.NetFileProcessor
             StringBuilder pResult = new StringBuilder(256);
 
             pResult.AppendFormat("Found {0} files(s) with {1} hidden and {2} innacessible", processor.FileCount, processor.HiddenFileCount, processor.InaccesibleFileCount);
-            pResult.AppendFormat(" and found {0} folder(s) with {1} hidden and {2} innacessible", processor.FileCount, processor.HiddenFileCount, processor.InaccesibleFileCount);
+            pResult.AppendFormat(" and found {0} folder(s) with {1} hidden and {2} innacessible", processor.DirectoryCount, processor.HiddenDirectoryCount, processor.InaccesibleDirectoryCount);
 
             player.Text = pResult.ToString().Trim();
             player.Play();

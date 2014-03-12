@@ -57,7 +57,7 @@ namespace ITI.NetFileProcessor
         #region private methods
         private void ProcessFile(FileInfo file, DirectoryInfo parent)
         {
-            if (isHidden(parent))
+            if (!isHidden(file) && isHidden(parent))
             {
                 InaccesibleFileCount += 1;
             }
@@ -80,9 +80,21 @@ namespace ITI.NetFileProcessor
             {
                 HiddenDirectoryCount += 1;
             }
-            if (null != directory.Parent && isHidden(directory.Parent))
+            else if (isParentDiretoryHidden(directory.Parent))
             {
                 InaccesibleDirectoryCount += 1;
+            }
+        }
+
+        private bool isParentDiretoryHidden(DirectoryInfo directory)
+        {
+            if (null == directory.Parent)
+            {
+                return false;
+            }
+            else
+            {
+                return isHidden(directory.Parent);
             }
         }
 

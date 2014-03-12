@@ -91,7 +91,6 @@ namespace ITI.NetMorseCode
             {
                 char charVal;
                 reverseMorseTable.TryGetValue(morseVal, out charVal);
-
                 if ('\0' != charVal)
                 {
                     textBuilder.Append(charVal);
@@ -101,13 +100,13 @@ namespace ITI.NetMorseCode
         }
         #endregion
 
-        private int pulseDurationInSeconde { get; set; }
+        private int pulseDurationInMSeconds { get; set; }
         public MorseProcessor() : this(13) { }
         public MorseProcessor(int wordPerMinutes) : this(wordPerMinutes, MorseStandard.PARIS) { }
         public MorseProcessor(int wordPerMinutes, MorseStandard standard)
         {
             if (wordPerMinutes <= 0) { throw new ArgumentOutOfRangeException("wordPerMinutes", "Should be superior at 0"); }
-            pulseDurationInSeconde = 60000 / ((int)standard * wordPerMinutes);
+            pulseDurationInMSeconds = 60000 / ((int)standard * wordPerMinutes);
         }
 
         public List<MorsePulsation> GetPulseFromText(string text)
@@ -131,30 +130,30 @@ namespace ITI.NetMorseCode
                         switch (c)
                         {
                             case '.':
-                                pulsations.Add(new MorsePulsation(PulsationToSecond(1), PulsationType.EMISSION));
+                                pulsations.Add(new MorsePulsation(PulsationToMSeconds(1), PulsationType.EMISSION));
                                 break;
                             case '-':
                                 if (lastChar == '.')
                                 {
-                                    pulsations.Add(new MorsePulsation(PulsationToSecond(1), PulsationType.PAUSE));
+                                    pulsations.Add(new MorsePulsation(PulsationToMSeconds(1), PulsationType.PAUSE));
                                 }
-                                pulsations.Add(new MorsePulsation(PulsationToSecond(3), PulsationType.EMISSION));
+                                pulsations.Add(new MorsePulsation(PulsationToMSeconds(3), PulsationType.EMISSION));
                                 break;
                         }
                         lastChar = c;
                     }
-                    pulsations.Add(new MorsePulsation(PulsationToSecond(3), PulsationType.PAUSE));
+                    pulsations.Add(new MorsePulsation(PulsationToMSeconds(3), PulsationType.PAUSE));
                 }
                 // TODO Fix
-                // NXT Should be 7 units at the end of an word, but till we use an ugly thead.sleep in the morse player, the silent beat is too slow
-                pulsations.Add(new MorsePulsation(PulsationToSecond(1), PulsationType.PAUSE));
+                // NXT Should be 7 instead of 1 pulse units at the end of an word, but till we use an ugly thread.sleep in the morse player, the pause beat is too slow
+                pulsations.Add(new MorsePulsation(PulsationToMSeconds(1), PulsationType.PAUSE));
             }
             return pulsations;
         }
 
-        private int PulsationToSecond(int pCount)
+        private int PulsationToMSeconds(int pCount)
         {
-            return pCount * pulseDurationInSeconde;
+            return pCount * pulseDurationInMSeconds;
         }
     }
 }
