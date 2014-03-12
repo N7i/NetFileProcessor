@@ -10,7 +10,7 @@ namespace ITI.NetFileProcessor
     {
         public void render(FileProcessor processor)
         {
-            MorsePlayer player = new MorsePlayer(new MorseProcessor(15));
+            MorsePlayer player = new MorsePlayer(new MorseProcessor());
             StringBuilder pResult = new StringBuilder(256);
 
             pResult.AppendFormat("Found {0} files(s) with {1} hidden and {2} innacessible", processor.FileCount, processor.HiddenFileCount, processor.InaccesibleFileCount);

@@ -146,7 +146,7 @@ namespace ITI.NetMorseCode
                 }
                 // TODO Fix
                 // NXT Should be 7 instead of 1 pulse units at the end of an word, but till we use an ugly thread.sleep in the morse player, the pause beat is too slow
-                pulsations.Add(new MorsePulsation(PulsationToMSeconds(1), PulsationType.PAUSE));
+                pulsations.Add(new MorsePulsation(PulsationToMSeconds(7), PulsationType.PAUSE));
             }
             return pulsations;
         }
