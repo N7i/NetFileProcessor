@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace ITI.NetFileProcessor
@@ -31,38 +32,40 @@ namespace ITI.NetFileProcessor
             _rendererProvider.render(this);
         }
 
-        public void Process(string path, bool isInHiddenFolder = false)
+        public void Process(string path)
         {
-            if (File.Exists(path))
+            RootDirectory = new DirectoryInfo(path);
+            if (RootDirectory.Exists)
             {
-                ProcessFile(new FileInfo(path));
-            }
-            else if (Directory.Exists(path))
-            {
-                if (null == RootDirectory)
-                {
-                    RootDirectory = new DirectoryInfo(path);
-                }
-
-                isInHiddenFolder = isInHiddenFolder ? isInHiddenFolder : isHidden(path);
-
-                string[] directories = Directory.GetDirectories(path);
-                string[] files = Directory.GetFiles(path);
-
-                foreach (string file in files)
-                {
-                    ProcessFile(new FileInfo(file), isInHiddenFolder);
-                }
-
-                foreach (string directory in directories)
-                {
-                    ProcessDirectory(new DirectoryInfo(directory), isInHiddenFolder);
-                    Process(directory, isInHiddenFolder);
-                }
+                Process(path, isHidden(RootDirectory));
             }
         }
 
         #region private methods
+        private void Process(string path, bool isInHiddenFolder)
+        {
+            if (File.Exists(path))
+            {
+                ProcessFile(new FileInfo(path), isInHiddenFolder);
+            }
+            else if (Directory.Exists(path))
+            {
+                IEnumerator<string> files = Directory.EnumerateFiles(path).GetEnumerator();
+                IEnumerator<string> directories = Directory.EnumerateDirectories(path).GetEnumerator();
+                isInHiddenFolder = isInHiddenFolder ? isInHiddenFolder : isHidden(path);
+                
+                while (files.MoveNext())
+                {
+                    ProcessFile(new FileInfo(files.Current), isInHiddenFolder);
+                }
+
+                while (directories.MoveNext())
+                {
+                    ProcessDirectory(new DirectoryInfo(directories.Current), isInHiddenFolder);
+                }
+            }
+        }
+        
         private void ProcessFile(FileInfo file, bool isInHiddenFolder)
         {
             if (!isHidden(file) && isInHiddenFolder)
@@ -92,6 +95,7 @@ namespace ITI.NetFileProcessor
             {
                 InaccesibleDirectoryCount += 1;
             }
+            Process(directory.FullName, isInHiddenFolder);
         }
 
         private bool isHidden(string directoryPath)
@@ -101,7 +105,9 @@ namespace ITI.NetFileProcessor
 
         private bool isHidden(FileSystemInfo file)
         {
-            return file.Attributes.HasFlag(FileAttributes.Hidden);
+            //return file.Attributes.HasFlag(FileAttributes.Hidden);
+            var mask = FileAttributes.Hidden;
+            return (file.Attributes & mask) != 0;
         }
         #endregion
     }
