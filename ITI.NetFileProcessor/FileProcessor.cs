@@ -6,8 +6,7 @@ namespace ITI.NetFileProcessor
     public class FileProcessor
     {
         IFileProcessorRenderer _rendererProvider;
-        DirectoryInfo _startDirectory;
-
+        
         #region attributes
         public int FileCount { get; private set; }
         public int HiddenFileCount { get; private set; }
@@ -15,6 +14,7 @@ namespace ITI.NetFileProcessor
         public int DirectoryCount { get; private set; }
         public int HiddenDirectoryCount { get; private set; }
         public int InaccesibleDirectoryCount { get; private set; }
+        public DirectoryInfo RootDirectory { get; private set; }
         #endregion
 
         #region constructor
@@ -31,7 +31,7 @@ namespace ITI.NetFileProcessor
             _rendererProvider.render(this);
         }
 
-        public void Process(string path)
+        public void Process(string path, bool isInHiddenFolder = false)
         {
             if (File.Exists(path))
             {
@@ -39,32 +39,33 @@ namespace ITI.NetFileProcessor
             }
             else if (Directory.Exists(path))
             {
-                // save init start Directory
-                if (null == _startDirectory)
+                if (null == RootDirectory)
                 {
-                    _startDirectory = new DirectoryInfo(path);
+                    RootDirectory = new DirectoryInfo(path);
                 }
+
+                isInHiddenFolder = isInHiddenFolder ? isInHiddenFolder : isHidden(path);
 
                 string[] directories = Directory.GetDirectories(path);
                 string[] files = Directory.GetFiles(path);
 
                 foreach (string file in files)
                 {
-                    ProcessFile(new FileInfo(file), new DirectoryInfo(path));
+                    ProcessFile(new FileInfo(file), isInHiddenFolder);
                 }
 
                 foreach (string directory in directories)
                 {
-                    ProcessDirectory(new DirectoryInfo(directory));
-                    Process(directory);
+                    ProcessDirectory(new DirectoryInfo(directory), isInHiddenFolder);
+                    Process(directory, isInHiddenFolder);
                 }
             }
         }
 
         #region private methods
-        private void ProcessFile(FileInfo file, DirectoryInfo parent)
+        private void ProcessFile(FileInfo file, bool isInHiddenFolder)
         {
-            if (!isHidden(file) && hasAnHiddenParent(parent))
+            if (!isHidden(file) && isInHiddenFolder)
             {
                 InaccesibleFileCount += 1;
             }
@@ -80,36 +81,22 @@ namespace ITI.NetFileProcessor
             }
         }
 
-        private void ProcessDirectory(DirectoryInfo directory)
+        private void ProcessDirectory(DirectoryInfo directory, bool isInHiddenFolder)
         {
             DirectoryCount += 1;
             if (isHidden(directory))
             {
                 HiddenDirectoryCount += 1;
             }
-            else if (hasAnHiddenParent(directory))
+            else if (isInHiddenFolder)
             {
                 InaccesibleDirectoryCount += 1;
             }
         }
 
-        private bool hasAnHiddenParent(DirectoryInfo directory)
+        private bool isHidden(string directoryPath)
         {
-            if (null != directory && directory.FullName != _startDirectory.FullName)
-            {
-                if (isHidden(directory))
-                {
-                    return true;
-                }
-                else
-                {
-                    return hasAnHiddenParent(directory.Parent);
-                }
-            }
-            else
-            {
-                return false;
-            }
+            return isHidden(new DirectoryInfo(directoryPath));
         }
 
         private bool isHidden(FileSystemInfo file)
