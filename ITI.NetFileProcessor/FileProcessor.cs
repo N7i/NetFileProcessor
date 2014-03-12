@@ -7,16 +7,9 @@ namespace ITI.NetFileProcessor
     public class FileProcessor
     {
         IFileProcessorRenderer _rendererProvider;
-        
-        #region attributes
-        public int FileCount { get; private set; }
-        public int HiddenFileCount { get; private set; }
-        public int InaccesibleFileCount { get; private set; }
-        public int DirectoryCount { get; private set; }
-        public int HiddenDirectoryCount { get; private set; }
-        public int InaccesibleDirectoryCount { get; private set; }
-        public DirectoryInfo RootDirectory { get; private set; }
-        #endregion
+        DirectoryResult _directoryResult;
+
+        public DirectoryResult Result { get { return _directoryResult;  } }
 
         #region constructor
         public FileProcessor() : this(new ConsoleFileProcessorRenderer()) { } 
@@ -24,6 +17,7 @@ namespace ITI.NetFileProcessor
         public FileProcessor(IFileProcessorRenderer rendererProvider)
         {
             _rendererProvider = rendererProvider;
+            _directoryResult = new DirectoryResult();
         }
         #endregion
 
@@ -32,70 +26,71 @@ namespace ITI.NetFileProcessor
             _rendererProvider.render(this);
         }
 
-        public void Process(string path)
+        public DirectoryResult Process(string path)
         {
-            RootDirectory = new DirectoryInfo(path);
-            if (RootDirectory.Exists)
+            _directoryResult.RootDirectory = new DirectoryInfo(path);
+            if (_directoryResult.RootDirectory.Exists)
             {
-                Process(path, isHidden(RootDirectory));
+                Process(path, isHidden(_directoryResult.RootDirectory));
             }
+            return _directoryResult;
         }
 
         #region private methods
-        private void Process(string path, bool isInHiddenFolder)
+        private void Process(string path, bool hasParentHidden)
         {
             if (File.Exists(path))
             {
-                ProcessFile(new FileInfo(path), isInHiddenFolder);
+                ProcessFile(path, hasParentHidden);
             }
             else if (Directory.Exists(path))
             {
-                IEnumerator<string> files = Directory.EnumerateFiles(path).GetEnumerator();
-                IEnumerator<string> directories = Directory.EnumerateDirectories(path).GetEnumerator();
-                isInHiddenFolder = isInHiddenFolder ? isInHiddenFolder : isHidden(path);
-                
-                while (files.MoveNext())
+                hasParentHidden = hasParentHidden ? hasParentHidden : isHidden(path);
+
+                foreach (string file in SafeFileEnumerator.EnumerateFiles(path))
                 {
-                    ProcessFile(new FileInfo(files.Current), isInHiddenFolder);
+                    ProcessFile(file, hasParentHidden);
                 }
 
-                while (directories.MoveNext())
+                foreach (string directory in SafeFileEnumerator.EnumerateDirectories(path))
                 {
-                    ProcessDirectory(new DirectoryInfo(directories.Current), isInHiddenFolder);
+                    ProcessDirectory(directory, hasParentHidden);
                 }
             }
         }
-        
-        private void ProcessFile(FileInfo file, bool isInHiddenFolder)
-        {
-            if (!isHidden(file) && isInHiddenFolder)
-            {
-                InaccesibleFileCount += 1;
-            }
-            ProcessFile(file);
-        }
 
-        private void ProcessFile(FileInfo file)
+        private void ProcessFile(string path, bool hasParentHidden)
         {
-            FileCount += 1;
+            FileInfo file = new FileInfo(path);
+
             if (isHidden(file))
             {
-                HiddenFileCount += 1;
+                _directoryResult.HiddenFileCount += 1;
             }
+
+            if (isHidden(file) || hasParentHidden)
+            {
+                _directoryResult.InaccesibleFileCount += 1;
+            }
+            _directoryResult.FileCount += 1;
         }
 
-        private void ProcessDirectory(DirectoryInfo directory, bool isInHiddenFolder)
+        private void ProcessDirectory(string directoryPath, bool hasParentHidden)
         {
-            DirectoryCount += 1;
+            DirectoryInfo directory = new DirectoryInfo(directoryPath);
+
             if (isHidden(directory))
             {
-                HiddenDirectoryCount += 1;
+                _directoryResult.HiddenDirectoryCount += 1;
             }
-            else if (isInHiddenFolder)
+
+            if (isHidden(directory) || hasParentHidden)
             {
-                InaccesibleDirectoryCount += 1;
+                _directoryResult.InaccesibleDirectoryCount += 1;
             }
-            Process(directory.FullName, isInHiddenFolder);
+
+            _directoryResult.DirectoryCount += 1;
+            Process(directory.FullName, hasParentHidden);
         }
 
         private bool isHidden(string directoryPath)

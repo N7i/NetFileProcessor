@@ -41,9 +41,11 @@
   <ItemGroup>
     <Compile Include="ConsoleMorseFileProcessorRenderer.cs" />
     <Compile Include="ConsoleFileProcessorRenderer.cs" />
+    <Compile Include="DirectoryResult.cs" />
     <Compile Include="FileProcessor.cs" />
     <Compile Include="IFileProcessorRenderer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SafeFileEnumerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ITI.NetMorseCode\ITI.NetMorseCode.csproj">
