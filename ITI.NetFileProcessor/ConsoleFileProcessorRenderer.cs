@@ -9,8 +9,8 @@ namespace ITI.NetFileProcessor
     {
         public void render(FileProcessor processor)
         {
-            Console.WriteLine("Found {0} files(s) with {1} hidden and {2} innacessible", processor.FileCount, processor.HiddenFileCount, processor.InaccesibleFileCount);
-            Console.WriteLine("Found {0} folder(s) with {1} hidden and {2} innacessible", processor.DirectoryCount, processor.HiddenDirectoryCount, processor.InaccesibleDirectoryCount);
+            Console.WriteLine("Found {0} files(s) with {1} hidden and {2} inacessible", processor.FileCount, processor.HiddenFileCount, processor.InaccesibleFileCount);
+            Console.WriteLine("Found {0} folder(s) with {1} hidden and {2} inacessible", processor.DirectoryCount, processor.HiddenDirectoryCount, processor.InaccesibleDirectoryCount);
         }
     }
 }
