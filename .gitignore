@@ -12,3 +12,11 @@ ITI.NetMorseCode/bin/
 ITI.NetMorseCode/obj/
 ITI.Run/obj/
 NetFileProcessor.v12.suo
+ITI.NetFileProcessor.Tests/bin/*
+ITI.NetFileProcessor.Tests/obj/*
+packages/NUnitTestAdapter.1.0/*
+.nuget/*
+packages/*
+TestResults/c7563c40-b522-4d48-ba11-3a9a7aaa85d8/Nementon_NEMENTON-PC 2014-03-12 15_41_29.coverage
+NetFileProcessor.v12.suo
+NetFileProcessor.v12.suo
