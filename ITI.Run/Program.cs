@@ -9,7 +9,6 @@ using ITI.NetMorseCode;
 
 namespace EatMyShort
 {
-
     class Program
     {
         static ConsoleColor getRandomColor()

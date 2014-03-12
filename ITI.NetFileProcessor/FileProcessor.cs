@@ -6,7 +6,8 @@ namespace ITI.NetFileProcessor
     public class FileProcessor
     {
         IFileProcessorRenderer _rendererProvider;
-        
+        DirectoryInfo _startDirectory;
+
         #region attributes
         public int FileCount { get; private set; }
         public int HiddenFileCount { get; private set; }
@@ -38,8 +39,14 @@ namespace ITI.NetFileProcessor
             }
             else if (Directory.Exists(path))
             {
-                string[] directories = Directory.GetDirectories(path, "*", SearchOption.AllDirectories);
-                string[] files = Directory.GetFiles(path, "*", SearchOption.AllDirectories);
+                // save init start Directory
+                if (null == _startDirectory)
+                {
+                    _startDirectory = new DirectoryInfo(path);
+                }
+
+                string[] directories = Directory.GetDirectories(path);
+                string[] files = Directory.GetFiles(path);
 
                 foreach (string file in files)
                 {
@@ -57,7 +64,7 @@ namespace ITI.NetFileProcessor
         #region private methods
         private void ProcessFile(FileInfo file, DirectoryInfo parent)
         {
-            if (!isHidden(file) && isHidden(parent))
+            if (!isHidden(file) && hasAnHiddenParent(parent))
             {
                 InaccesibleFileCount += 1;
             }
@@ -80,21 +87,28 @@ namespace ITI.NetFileProcessor
             {
                 HiddenDirectoryCount += 1;
             }
-            else if (isParentDiretoryHidden(directory.Parent))
+            else if (hasAnHiddenParent(directory))
             {
                 InaccesibleDirectoryCount += 1;
             }
         }
 
-        private bool isParentDiretoryHidden(DirectoryInfo directory)
+        private bool hasAnHiddenParent(DirectoryInfo directory)
         {
-            if (null == directory.Parent)
+            if (null != directory && directory.FullName != _startDirectory.FullName)
             {
-                return false;
+                if (isHidden(directory))
+                {
+                    return true;
+                }
+                else
+                {
+                    return hasAnHiddenParent(directory.Parent);
+                }
             }
             else
             {
-                return isHidden(directory.Parent);
+                return false;
             }
         }
 
